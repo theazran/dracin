@@ -1,0 +1,177 @@
+<%- include('partials/header') %>
+
+    <main class="play-container">
+        <div class="video-section">
+            <div class="video-player">
+                <video id="main-video" controls autoplay poster="<%= currentEpisode.episodeCover %>"
+                    src="<%= currentEpisode.playVoucher %>">
+                    Browser Anda tidak mendukung tag video.
+                </video>
+            </div>
+
+            <div class="drama-info-bar">
+                <h1>
+                    <%= drama.shortPlayName %> - Episode <%= currentEpisode.episodeNo %>
+                </h1>
+                <div class="drama-meta-large">
+                    <span class="heat-badge"><i class="fas fa-fire"></i>
+                        <%= drama.defaultLikeNums %> Likes
+                    </span>
+                    <span class="view-badge"><i class="fas fa-eye"></i>
+                        <%= currentEpisode.chaseNums %> Views
+                    </span>
+                    <span class="ep-count">
+                        <%= drama.totalEpisode %> Episode
+                    </span>
+                </div>
+                <p class="drama-description">
+                    <%= drama.shotIntroduce %>
+                </p>
+                <div class="label-list">
+                    <% drama.shortPlayLabels.forEach(label=> { %>
+                        <span class="label-tag">
+                            <%= label %>
+                        </span>
+                        <% }); %>
+                </div>
+            </div>
+        </div>
+
+        <aside class="episode-sidebar">
+            <div class="sidebar-header">
+                <h3>Daftar Episode</h3>
+                <span>
+                    <%= drama.totalEpisode %> Total
+                </span>
+            </div>
+            <div class="episode-list">
+                <% drama.shortPlayEpisodeInfos.forEach(ep=> { %>
+                    <a href="/play/<%= drama.shortPlayId %>?ep=<%= ep.episodeNo %>"
+                        class="episode-item <%= ep.episodeNo === currentEpisode.episodeNo ? 'active' : '' %>">
+                        <div class="ep-img-container">
+                            <img src="<%= ep.episodeCover %>" alt="Ep <%= ep.episodeNo %>">
+                            <span class="ep-no">
+                                <%= ep.episodeNo %>
+                            </span>
+                        </div>
+                        <div class="ep-detail">
+                            <span class="ep-name">Episode <%= ep.episodeNo %></span>
+                            <span class="ep-stats"><i class="fas fa-thumbs-up"></i>
+                                <%= ep.likeNums %>
+                            </span>
+                        </div>
+                    </a>
+                    <% }); %>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Data Injection -->
+    <div id="drama-json-data" style="display:none;"><%- dramaJSON %></div>
+
+    <script>
+        const video = document.getElementById('main-video');
+        let dramaData = null;
+        try {
+            dramaData = JSON.parse(document.getElementById('drama-json-data').textContent);
+        } catch (e) {
+            console.error("Failed to parse drama data:", e);
+        }
+
+        let currentEpNo = <%= currentEpisode.episodeNo %>;
+
+        const updateUI = (epNo) => {
+            if (!dramaData || !dramaData.shortPlayEpisodeInfos) return;
+            const ep = dramaData.shortPlayEpisodeInfos.find(e => e.episodeNo === epNo);
+            if (!ep) return;
+
+            // Reset and load new video
+            video.pause();
+            video.src = ep.playVoucher;
+            video.poster = ep.episodeCover;
+            video.load();
+
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => console.log("Autoplay blocked:", error));
+            }
+
+            // Update Text Info
+            const titleEl = document.querySelector('.drama-info-bar h1');
+            if (titleEl) titleEl.textContent = `${dramaData.shortPlayName} - Episode ${ep.episodeNo}`;
+
+            const viewEl = document.querySelector('.view-badge');
+            if (viewEl) viewEl.innerHTML = `<i class="fas fa-eye"></i> ${ep.chaseNums} Views`;
+
+            // Update Sidebar UI
+            document.querySelectorAll('.episode-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href').includes(`ep=${ep.episodeNo}`)) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+
+            // Update Browser URL & Title
+            const newUrl = `/play/${dramaData.shortPlayId}?ep=${ep.episodeNo}`;
+            history.pushState({ epNo }, '', newUrl);
+            document.title = `${dramaData.shortPlayName} - Ep ${ep.episodeNo} | Dracin`;
+
+            currentEpNo = epNo;
+        };
+
+        if (video) {
+            video.addEventListener('ended', () => {
+                if (!dramaData) return;
+                const currentIndex = dramaData.shortPlayEpisodeInfos.findIndex(ep => ep.episodeNo === currentEpNo);
+                const nextEp = dramaData.shortPlayEpisodeInfos[currentIndex + 1];
+                if (nextEp) {
+                    updateUI(nextEp.episodeNo);
+                }
+            });
+
+            let lastScrollTime = 0;
+            const scrollCooldown = 800;
+            let touchStartY = 0;
+
+            const navigate = (direction) => {
+                if (!dramaData) return;
+                const now = Date.now();
+                if (now - lastScrollTime < scrollCooldown) return;
+
+                const currentIndex = dramaData.shortPlayEpisodeInfos.findIndex(ep => ep.episodeNo === currentEpNo);
+                const targetEp = direction === 'next'
+                    ? dramaData.shortPlayEpisodeInfos[currentIndex + 1]
+                    : dramaData.shortPlayEpisodeInfos[currentIndex - 1];
+
+                if (targetEp) {
+                    lastScrollTime = now;
+                    updateUI(targetEp.episodeNo);
+                }
+            };
+
+            window.addEventListener('wheel', (e) => {
+                if (!document.fullscreenElement) return;
+                if (Math.abs(e.deltaY) < 50) return;
+                if (e.deltaY > 0) navigate('next');
+                else navigate('prev');
+            }, { passive: true });
+
+            window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+            window.addEventListener('touchend', (e) => {
+                if (!document.fullscreenElement) return;
+                const deltaY = touchStartY - e.changedTouches[0].clientY;
+                if (Math.abs(deltaY) < 70) return;
+                if (deltaY > 0) navigate('next');
+                else navigate('prev');
+            }, { passive: true });
+        }
+
+        window.onpopstate = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const epNo = parseInt(urlParams.get('ep')) || 1;
+            updateUI(epNo);
+        };
+    </script>
+
+    <%- include('partials/footer') %>

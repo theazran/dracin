@@ -1,0 +1,193 @@
+<%- include('partials/header') %>
+
+    <main>
+        <section class="hero">
+            <h1>Jelajahi Dunia DramaBox</h1>
+            <p>Ribuan serial pendek berkualitas tinggi yang sedang trending sekarang. Nikmati pengalaman streaming
+                terbaik.</p>
+        </section>
+
+        <% if (dbTrending && dbTrending.length> 0) { %>
+            <section id="db-trending">
+                <h2 class="section-title">
+                    <i class="fas fa-bolt" style="color: #f59e0b;"></i> Trending Sekarang
+                </h2>
+                <div class="drama-grid">
+                    <% dbTrending.forEach(drama=> { %>
+                        <% if (drama.bookId) { %>
+                            <a href="/dramabox/play/<%= drama.bookId %>" class="drama-card">
+                                <img src="<%= drama.coverWap || drama.cover || drama.verticalCover %>"
+                                    alt="<%= drama.bookName || drama.title %>" class="card-img" loading="lazy">
+                                <div class="card-info">
+                                    <h3 class="card-title text-shadow">
+                                        <%= drama.bookName || drama.title %>
+                                    </h3>
+                                    <div class="card-meta">
+                                        <span class="heat-score">
+                                            <i class="fas fa-chart-line"></i> Trending
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                            <% } %>
+                                <% }); %>
+                </div>
+            </section>
+            <% } %>
+
+                <% if (dbVip && dbVip.length> 0) { %>
+                    <% dbVip.forEach(column=> { %>
+                        <section class="db-column">
+                            <h2 class="section-title">
+                                <i class="fas fa-crown" style="color: #4D65ED;"></i>
+                                <%= column.title %>
+                            </h2>
+                            <div class="drama-grid">
+                                <% column.bookList.forEach(drama=> { %>
+                                    <a href="/dramabox/play/<%= drama.bookId %>" class="drama-card">
+                                        <img src="<%= drama.coverWap %>" alt="<%= drama.bookName %>" class="card-img"
+                                            loading="lazy">
+                                        <div class="card-info">
+                                            <h3 class="card-title text-shadow">
+                                                <%= drama.bookName %>
+                                            </h3>
+                                            <div class="card-meta">
+                                                <span class="heat-score">
+                                                    <i class="fas fa-play"></i>
+                                                    <%= drama.playCount %> Dilihat
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    <% }); %>
+                            </div>
+                        </section>
+                        <% }); %>
+                            <% } %>
+
+                                <% if (dbPopular && dbPopular.length> 0) { %>
+                                    <section id="db-popular">
+                                        <h2 class="section-title">
+                                            <i class="fas fa-fire-alt" style="color: #ff4500;"></i> Paling Banyak Dicari
+                                        </h2>
+                                        <div class="drama-grid">
+                                            <% dbPopular.forEach(drama=> { %>
+                                                <a href="/dramabox/play/<%= drama.bookId %>" class="drama-card">
+                                                    <img src="<%= drama.coverWap %>" alt="<%= drama.bookName %>"
+                                                        class="card-img" loading="lazy">
+                                                    <div class="card-info">
+                                                        <h3 class="card-title text-shadow">
+                                                            <%= drama.bookName %>
+                                                        </h3>
+                                                        <div class="card-meta">
+                                                            <span class="heat-score">
+                                                                <i class="fas fa-fire"></i>
+                                                                <%= (drama.rankVo && drama.rankVo.hotCode) ?
+                                                                    drama.rankVo.hotCode : 'Hits' %>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                                <% }); %>
+                                        </div>
+                                    </section>
+                                    <% } %>
+
+                                        <% if (dbDubPop && dbDubPop.length> 0) { %>
+                                            <section id="db-dub-pop">
+                                                <h2 class="section-title">
+                                                    <i class="fas fa-microphone-alt" style="color: #F54E96;"></i> Dub
+                                                    Indo Terpopuler
+                                                </h2>
+                                                <div class="drama-grid">
+                                                    <% dbDubPop.forEach(drama=> { %>
+                                                        <a href="/dramabox/play/<%= drama.bookId %>" class="drama-card">
+                                                            <img src="<%= drama.coverWap %>" alt="<%= drama.bookName %>"
+                                                                class="card-img" loading="lazy">
+                                                            <div class="card-info">
+                                                                <h3 class="card-title text-shadow">
+                                                                    <%= drama.bookName %>
+                                                                </h3>
+                                                                <div class="card-meta">
+                                                                    <span class="heat-score">
+                                                                        <i class="fas fa-play"></i>
+                                                                        <%= drama.playCount %>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                        <% }); %>
+                                                </div>
+                                            </section>
+                                            <% } %>
+
+                                                <% if (dbDubNew && dbDubNew.length> 0) { %>
+                                                    <section id="db-dub-new">
+                                                        <h2 class="section-title">
+                                                            <i class="fas fa-microphone" style="color: #38bdf8;"></i>
+                                                            Dub Indo Terbaru
+                                                        </h2>
+                                                        <div class="drama-grid">
+                                                            <% dbDubNew.forEach(drama=> { %>
+                                                                <a href="/dramabox/play/<%= drama.bookId %>"
+                                                                    class="drama-card">
+                                                                    <img src="<%= drama.coverWap %>"
+                                                                        alt="<%= drama.bookName %>" class="card-img"
+                                                                        loading="lazy">
+                                                                    <div class="card-info">
+                                                                        <h3 class="card-title text-shadow">
+                                                                            <%= drama.bookName %>
+                                                                        </h3>
+                                                                        <div class="card-meta">
+                                                                            <span class="heat-score">
+                                                                                <i class="fas fa-plus"></i> Baru
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </a>
+                                                                <% }); %>
+                                                        </div>
+                                                    </section>
+                                                    <% } %>
+
+                                                        <% if (dbLatest && dbLatest.length> 0) { %>
+                                                            <section id="db-latest">
+                                                                <h2 class="section-title">
+                                                                    <i class="fas fa-history"
+                                                                        style="color: #3b82f6;"></i> Baru Ditambahkan
+                                                                </h2>
+                                                                <div class="drama-grid">
+                                                                    <% dbLatest.forEach(item=> { %>
+                                                                        <% let dramas=[]; if (item.bookId)
+                                                                            dramas.push(item); else if (item.tagCardVo
+                                                                            && item.tagCardVo.tagBooks)
+                                                                            dramas=item.tagCardVo.tagBooks; %>
+                                                                            <% dramas.slice(0, 4).forEach(drama=> { %>
+                                                                                <a href="/dramabox/play/<%= drama.bookId %>"
+                                                                                    class="drama-card">
+                                                                                    <img src="<%= drama.coverWap || drama.cover || drama.verticalCover %>"
+                                                                                        alt="<%= drama.bookName || drama.title %>"
+                                                                                        class="card-img" loading="lazy">
+                                                                                    <div class="card-info">
+                                                                                        <h3
+                                                                                            class="card-title text-shadow">
+                                                                                            <%= drama.bookName ||
+                                                                                                drama.title %>
+                                                                                        </h3>
+                                                                                        <div class="card-meta">
+                                                                                            <span class="heat-score">
+                                                                                                <i
+                                                                                                    class="fas fa-plus"></i>
+                                                                                                Baru
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </a>
+                                                                                <% }); %>
+                                                                                    <% }); %>
+                                                                </div>
+                                                            </section>
+                                                            <% } %>
+    </main>
+
+    <%- include('partials/footer') %>

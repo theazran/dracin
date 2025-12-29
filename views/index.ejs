@@ -1,0 +1,100 @@
+<%- include('partials/header') %>
+
+    <main>
+        <section class="hero">
+            <h1>Nonton Drama China Pendek Terpopuler</h1>
+            <p>Nikmati ribuan koleksi drama pendek eksklusif dengan kualitas 4K dan subtitle Indonesia terbaik.</p>
+        </section>
+
+        <% if (forYou && forYou.contentInfos) { %>
+            <section id="foryou">
+                <h2 class="section-title">
+                    <i class="fas fa-magic" style="color: #a855f7;"></i> Rekomendasi Untukmu
+                </h2>
+                <div class="drama-grid">
+                    <% forYou.contentInfos.forEach(drama=> { %>
+                        <a href="/play/<%= drama.shortPlayId %>" class="drama-card">
+                            <% if (drama.isNewLabel) { %>
+                                <span class="new-badge">NEW</span>
+                                <% } %>
+                                    <img src="<%= drama.shortPlayCover %>" alt="<%= drama.shortPlayName %>"
+                                        class="card-img" loading="lazy">
+                                    <div class="card-info">
+                                        <h3 class="card-title text-shadow">
+                                            <%= drama.shortPlayName %>
+                                        </h3>
+                                        <div class="card-meta">
+                                            <span class="heat-score">
+                                                <i class="fas fa-fire"></i>
+                                                <%= drama.heatScoreShow %>
+                                            </span>
+                                        </div>
+                                        <div class="label-list">
+                                            <% if (drama.labelArray && drama.labelArray.length> 0) { %>
+                                                <% drama.labelArray.slice(0, 2).forEach(label=> { %>
+                                                    <span class="label-tag">
+                                                        <%= label %>
+                                                    </span>
+                                                    <% }); %>
+                                                        <% } %>
+                                        </div>
+                                    </div>
+                        </a>
+                        <% }); %>
+                </div>
+            </section>
+            <% } %>
+
+
+
+                <% theaters.forEach((theater, index)=> { %>
+                    <section id="group-<%= theater.groupId %>">
+                        <h2 class="section-title">
+                            <%= theater.contentName %>
+                        </h2>
+
+                        <div class="drama-grid">
+                            <% theater.contentInfos.forEach(drama=> { %>
+                                <a href="/play/<%= drama.shortPlayId %>" class="drama-card">
+                                    <% if (drama.isNewLabel) { %>
+                                        <span class="new-badge">NEW</span>
+                                        <% } %>
+
+                                            <img src="<%= drama.shortPlayCover %>" alt="<%= drama.shortPlayName %>"
+                                                class="card-img" loading="lazy">
+
+                                            <div class="card-info">
+                                                <h3 class="card-title text-shadow">
+                                                    <%= drama.shortPlayName %>
+                                                </h3>
+                                                <div class="card-meta">
+                                                    <span class="heat-score">
+                                                        <i class="fas fa-fire"></i>
+                                                        <%= drama.heatScoreShow || formatHeat(drama.heatScore) %>
+                                                    </span>
+                                                    <span>
+                                                        <%= drama.totalReserveNum %> Dilihat
+                                                    </span>
+                                                </div>
+
+                                                <div class="label-list">
+                                                    <% if (drama.labelArray && drama.labelArray.length>
+                                                        0) {
+                                                        %>
+                                                        <% drama.labelArray.slice(0, 2).forEach(label=>
+                                                            { %>
+                                                            <span class="label-tag">
+                                                                <%= label %>
+                                                            </span>
+                                                            <% }); %>
+                                                                <% } %>
+                                                </div>
+                                            </div>
+                                </a>
+                                <% }); %>
+                        </div>
+                    </section>
+                    <% }); %>
+    </main>
+
+    <%- include('partials/footer') %>

@@ -1,0 +1,46 @@
+<%- include('partials/header') %>
+
+    <main>
+        <section class="hero" style="padding-bottom: 20px;">
+            <h1>Hasil Pencarian DramaBox</h1>
+            <p>Hasil untuk kata kunci: "<strong>
+                    <%= query %>
+                </strong>"</p>
+        </section>
+
+        <section>
+            <% if (results && results.length> 0) { %>
+                <div class="drama-grid">
+                    <% results.forEach(drama=> { %>
+                        <a href="/dramabox/play/<%= drama.bookId %>" class="drama-card">
+                            <img src="<%= drama.coverWap || drama.cover || drama.verticalCover %>"
+                                alt="<%= drama.bookName || drama.title %>" class="card-img" loading="lazy">
+                            <div class="card-info">
+                                <h3 class="card-title text-shadow">
+                                    <%= drama.bookName || drama.title %>
+                                </h3>
+                                <div class="card-meta">
+                                    <span class="heat-score">
+                                        <i class="fas fa-search"></i> DramaBox
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                        <% }); %>
+                </div>
+                <% } else { %>
+                    <div style="text-align: center; padding: 100px 0;">
+                        <i class="fas fa-search"
+                            style="font-size: 4rem; color: var(--glass-border); margin-bottom: 20px;"></i>
+                        <h2 style="color: var(--text-dim);">Tidak ada hasil ditemukan di DramaBox</h2>
+                        <p style="color: var(--text-dim); margin-top: 10px;">Coba kata kunci lain atau kembali ke
+                            beranda DramaBox.</p>
+                        <a href="/dramabox"
+                            style="display: inline-block; margin-top: 20px; background: var(--primary); color: white; padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: bold;">Ke
+                            DramaBox</a>
+                    </div>
+                    <% } %>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>

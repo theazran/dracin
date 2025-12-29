@@ -1,0 +1,181 @@
+<%- include('partials/header') %>
+
+    <main class="play-container">
+        <div class="video-section">
+            <div class="video-player">
+                <video id="main-video" controls autoplay src="<%= videoUrl %>">
+                    Browser Anda tidak mendukung tag video.
+                </video>
+            </div>
+
+            <div class="drama-info-bar">
+                <% let epTitle='Episode ' + currentEpisode; if (typeof episodes !=='undefined' && episodes) { for (let
+                    i=0; i < episodes.length; i++) { if (episodes[i].chapterIndex===currentEpisode - 1) {
+                    epTitle=episodes[i].chapterName; break; } } } %>
+                    <h1>
+                        <%= (typeof drama !=='undefined' && drama.bookName) ? drama.bookName : 'DramaBox' %> - <%=
+                                epTitle %>
+                    </h1>
+
+                    <div class="drama-meta-large">
+                        <span class="heat-badge"><i class="fas fa-fire"></i>
+                            <%= (typeof drama !=='undefined' && drama.playCount) ? drama.playCount : 'Hot' %> Views
+                        </span>
+                        <span class="view-badge"><i class="fas fa-tags"></i>
+                            <% if (typeof drama !=='undefined' && drama.tags && drama.tags.length> 0) { %>
+                                <%= drama.tags.slice(0, 3).join(', ') %>
+                        <% } else { %>
+                            DramaBox Original
+                        <% } %>
+                    </span>
+                </div>
+                
+                <p class="drama-description">
+                    <%= (typeof drama !== ' undefined' && drama.introduction) ? drama.introduction
+                                    : 'Nikmati streaming kualitas tinggi dari koleksi DramaBox.' %>
+                                    </p>
+                    </div>
+            </div>
+
+            <aside class="episode-sidebar">
+                <div class="sidebar-header">
+                    <h3>Daftar Episode</h3>
+                    <span>Total: <%= (typeof episodes !=='undefined' ) ? episodes.length : 0 %></span>
+                </div>
+                <div class="episode-list">
+                    <% if (typeof episodes !=='undefined' && episodes) { %>
+                        <% episodes.forEach(function(ep) { %>
+                            <a href="/dramabox/play/<%= bookId %>?ep=<%= ep.chapterIndex + 1 %>"
+                                class="episode-item <%= ep.chapterIndex + 1 === currentEpisode ? 'active' : '' %>">
+                                <div class="ep-img-container">
+                                    <img src="<%= ep.chapterImg || (typeof drama !== 'undefined' ? drama.coverWap : '') %>"
+                                        alt="<%= ep.chapterName %>">
+                                    <span class="ep-no">Ep <%= ep.chapterIndex + 1 %></span>
+                                </div>
+                                <div class="ep-detail">
+                                    <span class="ep-name">
+                                        <%= ep.chapterName %>
+                                    </span>
+                                    <span class="ep-stats">Pilih untuk memutar</span>
+                                </div>
+                            </a>
+                            <% }); %>
+                                <% } %>
+                </div>
+            </aside>
+    </main>
+
+    <!-- Data Injection -->
+    <div id="episodes-json-data" style="display:none;"><%- episodesJSON %></div>
+    <div id="drama-json-data" style="display:none;"><%- dramaJSON %></div>
+
+    <script>
+        const video = document.getElementById('main-video');
+        let episodesData = [];
+        let dramaData = {};
+        try {
+            episodesData = JSON.parse(document.getElementById('episodes-json-data').textContent);
+            dramaData = JSON.parse(document.getElementById('drama-json-data').textContent);
+        } catch (e) {
+            console.error("Failed to parse data:", e);
+        }
+
+        let currentEpIdx = <%= currentEpisode - 1 %>;
+
+        const getVideoUrl = (ep) => {
+            if (ep && ep.cdnList && ep.cdnList.length > 0) {
+                const cdn = ep.cdnList.find(c => c.isDefault === 1) || ep.cdnList[0];
+                const pathInfo = cdn.videoPathList.find(p => p.isDefault === 1) || cdn.videoPathList.find(p => p.quality === 720) || cdn.videoPathList[0];
+                return pathInfo ? pathInfo.videoPath : '';
+            }
+            return '';
+        };
+
+        const updateUI = (idx) => {
+            const ep = episodesData[idx];
+            if (!ep) return;
+
+            const videoUrl = getVideoUrl(ep);
+            if (!videoUrl) return;
+
+            // Reset and load new video
+            video.pause();
+            video.src = videoUrl;
+            video.load();
+
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => console.log("Autoplay blocked:", error));
+            }
+
+            // Update Text Info
+            const titleEl = document.querySelector('.drama-info-bar h1');
+            if (titleEl) titleEl.textContent = `${dramaData.bookName || 'DramaBox'} - ${ep.chapterName}`;
+
+            const descEl = document.querySelector('.drama-description');
+            if (descEl) descEl.textContent = dramaData.introduction || '';
+
+            // Update Sidebar UI
+            document.querySelectorAll('.episode-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href').includes(`ep=${idx + 1}`)) {
+                    item.classList.add('active');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+
+            // Update Browser URL & Title
+            const newUrl = `/dramabox/play/<%= bookId %>?ep=${idx + 1}`;
+            history.pushState({ idx }, '', newUrl);
+            document.title = `${dramaData.bookName || 'DramaBox'} - Ep ${idx + 1} | Dracin`;
+
+            currentEpIdx = idx;
+        };
+
+        if (video) {
+            video.addEventListener('ended', () => {
+                if (currentEpIdx < episodesData.length - 1) {
+                    updateUI(currentEpIdx + 1);
+                }
+            });
+
+            let lastScrollTime = 0;
+            const scrollCooldown = 800;
+            let touchStartY = 0;
+
+            const navigate = (direction) => {
+                const now = Date.now();
+                if (now - lastScrollTime < scrollCooldown) return;
+
+                const targetIdx = direction === 'next' ? currentEpIdx + 1 : currentEpIdx - 1;
+                if (targetIdx >= 0 && targetIdx < episodesData.length) {
+                    lastScrollTime = now;
+                    updateUI(targetIdx);
+                }
+            };
+
+            window.addEventListener('wheel', (e) => {
+                if (!document.fullscreenElement) return;
+                if (Math.abs(e.deltaY) < 50) return;
+                if (e.deltaY > 0) navigate('next');
+                else navigate('prev');
+            }, { passive: true });
+
+            window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+            window.addEventListener('touchend', (e) => {
+                if (!document.fullscreenElement) return;
+                const deltaY = touchStartY - e.changedTouches[0].clientY;
+                if (Math.abs(deltaY) < 70) return;
+                if (deltaY > 0) navigate('next');
+                else navigate('prev');
+            }, { passive: true });
+        }
+
+        window.onpopstate = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const epNo = parseInt(urlParams.get('ep')) || 1;
+            updateUI(epNo - 1);
+        };
+    </script>
+
+    <%- include('partials/footer') %>

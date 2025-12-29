@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <meta name="description"
+        content="Nonton drama China pendek subtitle Indonesia dengan kualitas premium hanya di Dracin.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+
+    <!-- Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <header>
+        <a href="/" class="logo">Dracin.</a>
+        <nav class="nav-switcher">
+            <a href="/"
+                class="switch-item <%= typeof activeNav !== 'undefined' && activeNav === 'netshort' ? 'active' : '' %>">
+                <i class="fas fa-film"></i> <span>Netshort</span>
+            </a>
+            <a href="/dramabox"
+                class="switch-item <%= typeof activeNav !== 'undefined' && activeNav === 'dramabox' ? 'active' : '' %>">
+                <i class="fas fa-gem"></i> <span>DramaBox</span>
+            </a>
+        </nav>
+        <div class="header-actions">
+            <form
+                action="<%= typeof activeNav !== 'undefined' && activeNav === 'dramabox' ? '/dramabox/search' : '/search' %>"
+                method="GET" class="search-form">
+                <input type="text" name="query" placeholder="Cari drama..." required>
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </header>
